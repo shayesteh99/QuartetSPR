@@ -1,0 +1,12 @@
+*.o
+**/bin/*
+*Make*
+*CMake*
+trees/*
+**/Test*/*
+*.trees
+*txt
+*cmake
+tqDist_hasbugs/
+*.log
+*.so
