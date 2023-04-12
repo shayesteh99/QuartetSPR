@@ -9,4 +9,3 @@ trees/*
 *cmake
 tqDist_hasbugs/
 *.log
-*.so
