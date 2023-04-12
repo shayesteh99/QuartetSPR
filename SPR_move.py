@@ -76,7 +76,6 @@ def main():
 	parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('-i', '--input', required=True, help="Input tree to be completed")
 	parser.add_argument('-r', '--refs', required=True, help="Reference trees that are used to complete input trees.")
-	# parser.add_argument('-t', '--true_tree', required=False, help="True species tree")
 	parser.add_argument('-o', '--output_file', required=True, help="Output file")
 
 	args = parser.parse_args()
@@ -107,6 +106,7 @@ def main():
 			tree_root = node
 		else:
 			nodes.append(node)
+	nodes = np.random.permutation(nodes)
 
 	if tree_root is None:
 		print("No root???")
@@ -138,33 +138,35 @@ def main():
 			continue
 
 		placement_set = clade_dict[label]
-		outputTrees, total_scores, _ = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set)
+		outputTrees, total_scores, spr_runtime = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set)
 		after_placement = max(total_scores, key=total_scores.get)
 		if total_scores[before_placement] == total_scores[after_placement]:
 			after_placement = before_placement
 
-		before_node = inputTree_obj.label_to_node([before_placement])[before_placement]
-		after_node = inputTree_obj.label_to_node([after_placement])[after_placement]
-		nodal_dist = cal_nodal_dist(before_node, after_node)
-		quartet_dist = total_scores[after_placement] - total_scores[before_placement]
+		# before_node = inputTree_obj.label_to_node([before_placement])[before_placement]
+		# after_node = inputTree_obj.label_to_node([after_placement])[after_placement]
+		# nodal_dist = cal_nodal_dist(before_node, after_node)
+		# quartet_dist = total_scores[after_placement] - total_scores[before_placement]
 
 		record = []
 		placement_string = ",".join(placement_set)
 		record.append(placement_string)
-		if is_labeled:
-			record.append(label)
-		else:
-			record.append("-")
+		record.append(str(len(placement_set)))
+		# if is_labeled:
+		# 	record.append(label)
+		# else:
+		# 	record.append("-")
 
-		record.append(str(nodal_dist))
-		record.append(str(quartet_dist))
-		n = num_leaves - len(placement_set)
-		n_choose_three = (n * (n-1) * (n-2)) / 6
-		record.append(str(n_choose_three))
+		record.append(str(spr_runtime))
+		# record.append(str(nodal_dist))
+		# record.append(str(quartet_dist))
+		# n = num_leaves - len(placement_set)
+		# n_choose_three = (n * (n-1) * (n-2)) / 6
+		# record.append(str(n_choose_three))
 		dataset.append(record)
 
 	with open(args.output_file, 'w') as f:
-		f.write("clade taxa" + "\t" + "label" + "\t" + "nodal dist" + "\t" + "quartet score diff" + "\t" + "remaining taxa choose 3" + "\n")
+		# f.write("clade taxa" + "\t" + "label" + "\t" + "nodal dist" + "\t" + "quartet score diff" + "\t" + "remaining taxa choose 3" + "\n")
 		for r in dataset:
 			f.write("\t".join(r) + "\n")
 

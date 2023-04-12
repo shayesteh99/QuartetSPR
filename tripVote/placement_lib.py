@@ -5,6 +5,7 @@ from tripVote.utils import reroot_at_edge, sample_by_depth, prune_long, sample_b
 from treeswift import *
 from math import log2, ceil, sqrt, exp
 from random import choices
+import time
 
 MIN_SMPL_SIZE = 3
 
@@ -296,6 +297,8 @@ def place_all_taxa(myTree, refTrees, placement_taxa):
     # placement_taxa: a list of all missing taxa on the query tree
     # IMPORTANT: assumming all trees have unique labeling for each node
 
+    start = time.time()
+
     tree_obj = read_tree_newick(myTree)
     active_leafset = set(leaf.label for leaf in tree_obj.traverse_leaves())
 
@@ -386,7 +389,9 @@ def place_all_taxa(myTree, refTrees, placement_taxa):
     #     w.add_child(new_node)    
              
     # return placement_label, tripScore, all_scores, d, rerooted_refTrees, tree_obj.newick()   
-    return all_scores  
+    end = time.time()
+    runtime = end - start
+    return all_scores, runtime
 
 
 def complete_gene_trees(myTrees,refTrees=None,sample_size='sqrt',nsample='default',placement_taxa=None):
@@ -431,7 +436,7 @@ def complete_gene_trees(myTrees,refTrees=None,sample_size='sqrt',nsample='defaul
           # x is missing in this tree, now we insert it
       print("Adding missing taxa to tree " + str(i+1)) # + ". Present in " + str(c) + " reference trees")
             # _,_,_,_,updated_tree = place_one_taxon(updated_tree,refs,x,max_depth='max',sample_size=sample_size,nsample=nsample,use_brlen=False,pseudo=1e-3,alpha=0)
-      total_scores = place_all_taxa(updated_tree,refs, placement_taxa)
+      total_scores, placemnet_runtime = place_all_taxa(updated_tree,refs, placement_taxa)
 
 
       best_id = None
@@ -488,4 +493,4 @@ def complete_gene_trees(myTrees,refTrees=None,sample_size='sqrt',nsample='defaul
       completed_trees.append(updated_tree)
       print("Completed tree " + str(i+1))
       print(updated_tree)
-    return completed_trees, sorted_scores      
+    return completed_trees, sorted_scores, placemnet_runtime    
