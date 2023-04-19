@@ -78,6 +78,10 @@ def main():
 	parser.add_argument('-r', '--refs', required=True, help="Reference trees that are used to complete input trees.")
 	parser.add_argument('-o', '--output_file', required=True, help="Output file")
 	parser.add_argument('-l', '--log_dir', required=True, help="Log Directory")
+	parser.add_argument('-m', '--min_thresh', required=True, help="Minimum Clade Size")
+	parser.add_argument('-x', '--max_thresh', required=True, help="Maximum Clade Size")
+
+
 
 	args = parser.parse_args()
 
@@ -149,6 +153,9 @@ def main():
 			continue
 
 		placement_set = clade_dict[label]
+		if len(placement_set) < int(args.min_thresh) or len(placement_set) > int(args.max_thresh):
+			continue
+
 		outputTrees, total_scores, spr_runtime = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set)
 		after_placement = max(total_scores, key=total_scores.get)
 		if total_scores[before_placement] == total_scores[after_placement]:
