@@ -55,14 +55,16 @@ def main():
         inputTrees_nobrlen.append(tree_obj.newick())
 
     outputTrees, total_scores, _ = complete_gene_trees(inputTrees_nobrlen,refTrees=refTrees,sample_size=sample_size,nsample=nsample,placement_taxa=placement_set)
+    print(total_scores)
     with open(args.output.replace(".trees", ".txt"),'w') as f:
         f.write(json.dumps(total_scores))
 
-    with open(args.output,'w') as f:
-        for tr in outputTrees[:-1]:
-            f.write(tr + "\n")
-        f.write(outputTrees[-1])
-        f.write('\n\n')
+    if outputTrees is not None:
+        with open(args.output,'w') as f:
+            for tr in outputTrees[:-1]:
+                f.write(tr + "\n")
+            f.write(outputTrees[-1])
+            f.write('\n\n')
     
     end = time.time()
     runtime = end - start

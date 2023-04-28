@@ -417,7 +417,7 @@ void HDT::handleCCToC()
     rho += c1Count->get_n_i(0) * c1->n_minus_one * (c2->n_paren_circ_square + c2->n_paren_circ_circ);
     rho += c2Count->get_n_paren_i_minus_one(0) * Util::binom2(c1->n_circ);
 
-    //Case 2
+    // Case 2
     rho += c1->n_circ * c2Count->get_n_circ_arrow_minus_one_arrow_i(0);
     rho += Util::binom2(c1->n_circ) * c2Count->get_n_minus_one_arrow_i(0);
     rho += (c1->n_bracket_minus_one_paren_circ_circ + c1->n_bracket_minus_one_paren_circ_square) * c2Count->get_n_i(0);

@@ -212,7 +212,7 @@ void HDT::handleG()
     rho += g1Count->get_n_paren_i_minus_one(0) * (g2->n_paren_circ_square + g2->n_paren_circ_circ);
     rho += g2Count->get_n_paren_i_minus_one(0) * (g1->n_paren_circ_square + g1->n_paren_circ_circ);
 
-    //Case 2
+    // Case 2
     rho += g1Count->get_n_i(0) * (g2->n_bracket_minus_one_paren_circ_square + g2->n_bracket_minus_one_paren_circ_circ);
     rho += g2Count->get_n_i(0) * (g1->n_bracket_minus_one_paren_circ_square + g1->n_bracket_minus_one_paren_circ_circ);
 

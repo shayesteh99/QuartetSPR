@@ -4,13 +4,13 @@
 
 bool TripletRooting::pairing(){
     if (!myRef->pairAltWorld(myTree, this->minus_one_leaves, false, tripCount)) {    
-    //if (myTree->isError()) {
-        //std::cerr << "TripletRooting::pairing: Failed to pair the two trees. Aborting!" << std::endl;
+    // if (myTree->isError()) {
+    //     std::cerr << "TripletRooting::pairing: Failed to pair the two trees. Aborting!" << std::endl;
         return false;
     }
 
     if (myRef->count_leaves() < 3){
-    	//std::cerr << "TripletRooting::pairing: Reference tree after pairing has less than 3 leaves. Aborting!" << std::endl;
+    	// std::cerr << "TripletRooting::pairing: Reference tree after pairing has less than 3 leaves. Aborting!" << std::endl;
 	return false;
     }
 
@@ -21,6 +21,9 @@ bool TripletRooting::pairing(){
 bool TripletRooting::find_optimal_root(){
     if (this->compute_tripScore()){
         //this->optimalRoot = optimaltripRoots->data;
+        if (optimaltripRoots.size() == 0){
+            return false;
+        }
         this->optimalRoot = optimaltripRoots[0];
         return true;
     } else{
@@ -30,12 +33,11 @@ bool TripletRooting::find_optimal_root(){
 
 bool TripletRooting::compute_tripScore(){
     if (!this->pairing()){
-        //cerr << "TripletRooting::compute_tripScore: Could not pair the two trees. Aborting!" << endl;
+        cerr << "TripletRooting::compute_tripScore: Could not pair the two trees. Aborting!" << endl;
         return false;
     }
     // construct HDT for myRef
     hdt = HDT::constructHDT(myRef, myTree->maxDegree + 1, dummyHDTFactory);
-
     this->color_minus_one_leaves(myRef);
     count(myTree);
     // this->print_all_nodes_info(myRef);
@@ -47,9 +49,7 @@ bool TripletRooting::compute_tripScore(){
     this->optimalTripScore = -1;
 
     this->tripCount->tripScore[r] = this->compute_root_tripScore();
-    
     this->__downroot__(myTree,this->tripCount->tripScore[r],false);
-
     return true;
 }
 
@@ -214,12 +214,12 @@ void TripletRooting::count(RootedTree *v) {
   hdt->updateCounters();
   // cout << "rho: " << this->hdt->getResolvedTriplets_root() << endl;
   // cout << "pi of two: " << this->hdt->getResolvedTriplets(2) << endl;
-  // cout << "n_bracket_circ_paren_square_square: " << this->hdt->n_bracket_circ_paren_square_square << endl;
+  // cout << "n_circ: " << this->hdt->n_circ << endl;
   // cout << "n_bracket_minus_one_paren_circ_square: " << this->hdt->n_bracket_minus_one_paren_circ_square << endl;
   // cout << "get_n_bracket_circ_paren_i_minus_one(0): " << this->hdt->countingVars.get_n_bracket_circ_paren_i_minus_one(0) << endl;
   // cout << "get_n_paren_circ_paren_i_minus_one(0): " << this->hdt->countingVars.get_n_paren_circ_paren_i_minus_one(0) << endl;
   // cout << "get_n_bracket_i_paren_circ_circ(2): " << this->hdt->countingVars.get_n_bracket_i_paren_circ_circ(2) << endl;
-  // cout << "get_n_bracket_circ_paren_ii(2): " << this->hdt->countingVars.get_n_bracket_circ_paren_ii(2) << endl;
+  // cout << "get_n_circ_arrow_minus_one_arrow_i(0): " << this->hdt->countingVars.get_n_circ_arrow_minus_one_arrow_i(0) << endl;
   // cout << "get_n_bracket_i_paren_jj(2, 1): " << this->hdt->countingVars.get_n_bracket_i_paren_jj(2, 1) << endl;
   // cout << "get_n_bracket_i_paren_jj(1, 2): " << this->hdt->countingVars.get_n_bracket_i_paren_jj(1, 2) << endl;
   // cout << "n_paren_zero_paren_i_circ of one: " << this->hdt->countingVars.get_n_paren_zero_paren_i_circ(1) << endl;

@@ -63,6 +63,11 @@ class HDT
 		// Used for extract+contract to work
 		INTTYPE_REST numZeroes;
 		INTTYPE_REST n_minus_one_total;
+
+		//make private again
+		CountingArray countingVars;
+		INTTYPE_REST n_circ_arrow_minus_one;
+		INTTYPE_REST n_circ;
 		
 
 	private:
@@ -72,7 +77,6 @@ class HDT
 		HDT *parent, *childParent;
 		TemplatedLinkedList<HDT*> *children;
 		int degree;
-		CountingArray countingVars;
 
 		// Soda13 color 0+1+...+d
 		// INTTYPE_REST n_circ_square;
@@ -83,7 +87,6 @@ class HDT
         INTTYPE_REST n_paren_circ_circ;
         // INTTYPE_REST n_paren_zero_minus_one;
         // INTTYPE_REST n_paren_zero_paren_circ_circ;
-        INTTYPE_REST n_circ_arrow_minus_one;
         INTTYPE_REST n_paren_zero_paren_circ_square;
         INTTYPE_REST n_paren_circ_minus_one;
         INTTYPE_REST n_minus_one_arrow_paren_circ_square;
@@ -107,7 +110,6 @@ class HDT
 		INTTYPE_REST n_bracket_minus_one_paren_circ_square;
 		INTTYPE_REST n_paren_minus_one_paren_circ_circ;
 		INTTYPE_REST n_bracket_minus_one_paren_circ_circ;
-		INTTYPE_REST n_circ;
 		INTTYPE_REST n_minus_one;
 		// INTTYPE_REST n_bracket_zero_paren_circ_circ;
 		INTTYPE_REST n_bracket_zero_paren_circ_square;

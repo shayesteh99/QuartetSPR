@@ -39,16 +39,16 @@ def get_clade_leaves(clade_dict, node):
 	if node.is_leaf():
 		if node.label not in clade_dict:
 			clade_dict[node.label] = [node.label]
-		return [node.label]
+		return
 
 	leaves = []
 	for child in node.child_nodes():
 		if child.label in clade_dict:
 			leaves += clade_dict[child.label]
 		else:
-			leaves += get_clade_leaves(clade_dict, child)
+			get_clade_leaves(clade_dict, child)
+			leaves += clade_dict[child.label]
 	clade_dict[node.label] = leaves
-	return leaves
 
 def cal_nodal_dist(u, v):
 	u_ancestors = {}
@@ -141,22 +141,24 @@ def main():
 		before_placement = other_child.label
 		# print("other child: ", other_child)
 		if parent.is_root():
-			new_tree.reroot(other_child)
-			other_child.remove_child(parent)
+			other_child.parent = None
+			new_tree.root = other_child
+			# new_tree.reroot(other_child)
+			# other_child.remove_child(parent)
 		else:
 			grand_parent = parent.parent
 			# print("grand parent: ", grand_parent)
 			grand_parent.remove_child(parent)
 			grand_parent.add_child(other_child)
 
-		if new_tree.num_nodes() < 3:
+		if new_tree.num_nodes(internal = False) < 3:
 			continue
 
 		placement_set = clade_dict[label]
 		if len(placement_set) < int(args.min_thresh) or len(placement_set) > int(args.max_thresh):
 			continue
 
-		outputTrees, total_scores, spr_runtime = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set)
+		outputTrees, total_scores, spr_runtime = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set, sample_size = 0 ,nsample = 0)
 		after_placement = max(total_scores, key=total_scores.get)
 		if total_scores[before_placement] == total_scores[after_placement]:
 			after_placement = before_placement

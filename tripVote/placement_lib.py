@@ -457,7 +457,7 @@ def complete_gene_trees(myTrees,refTrees=None,sample_size='sqrt',nsample='defaul
 
       if placement_node is None:
         print("Warning: Could not find optimal placement by tripVote. Aborting ...")
-        return None,None
+        return None,None,None
 
       # insert the missing_taxon onto the tree
       new_parent = Node()
