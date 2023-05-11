@@ -87,6 +87,8 @@ def main():
 	output_dir = args.output_dir
 	if not os.path.isdir(output_dir):
 		os.makedirs(output_dir)
+	if not os.path.isdir(os.path.join(output_dir, "rounds")):
+		os.makedirs(os.path.join(output_dir, "rounds"))
 
 	with open(args.input,'r') as f:
 		inputTree = f.read().strip().split("\n")[0]
@@ -112,7 +114,7 @@ def main():
 	print(improved_tree)
 	tree_improved = True
 
-	rounds_data = []
+	rounds_data = {}
 	n_round = 0
 	while tree_improved:
 		rnd = []
@@ -169,7 +171,7 @@ def main():
 				continue
 
 			placement_set = clade_dict[label]
-			print(placement_set)
+			# print(placement_set)
 
 			# info = {"node": label, "parent": label, "sibling": label}
 			# info = {'node': label, 'parent': parent.label, 'sibling': other_child.label}
@@ -179,8 +181,8 @@ def main():
 			# tree_dir = output_dir + '/input_' + label + ".trees"
 			# input_tree.write_tree_newick(tree_dir)
 
-			print("Tree Without Clade")
-			print(new_tree.newick())
+			# print("Tree Without Clade")
+			# print(new_tree.newick())
 
 			outputTrees, total_scores, spr_runtime = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set, sample_size = 0 ,nsample = 0)
 			after_placement = max(total_scores, key=total_scores.get)
@@ -194,7 +196,9 @@ def main():
 			quartet_dist = total_scores[after_placement] - total_scores[before_placement]
 			record = [label, len(placement_set), before_placement, after_placement, nodal_dist, quartet_dist]
 			rnd.append(record)
-			print(record)
+			# print(total_scores)
+			# print(record)
+			# print(record)
 			if after_placement == before_placement:
 				continue
 
@@ -217,27 +221,26 @@ def main():
 				w.add_child(n)
 
 			improved_tree = new_tree.newick()
-			print("Tree after placement:")
-			print(improved_tree)
-			# with open(output_dir + "/improved_tree.trees", 'w') as f:
-			# 	f.write(input_tree.newick() + '\n')
+			# print("Tree after placement:")
+			# print(improved_tree)
+			with open(os.path.join(output_dir, "rounds", "improved_tree_" + str(n_round) + ".trees"), 'w') as f:
+				f.write(improved_tree + '\n')
 			tree_improved = True
-			# tree_obj = treeswift.read_tree_newick(input_tree.newick())
-			break
-		rounds_data.append(rnd)
 
-	# mean_FN = compare_trees(trueTrees, output_dir + "/improved_tree.trees", output_dir)
-	# print("Improved FN: ", mean_FN)
-	# if initial_FN != 0:
-	# 	print("The estimated tree was improved by ", (initial_FN - mean_FN) * 100 / (initial_FN), "%")
+			break
+		rounds_data[n_round] = rnd
+
+	end = time.time()
+	runtime = end - start
+	print("Runtime: ", runtime) 
 
 	with open(os.path.join(output_dir, "improved_tree.trees"), 'w') as f:
 		f.write(improved_tree + '\n')
-	np.save(os.path.join(output_dir, "rounds.npy"), rounds_data)
+	with open(os.path.join(output_dir, "rounds_info.txt"), 'w') as f:
+		f.write(json.dumps(rounds_data))
+	with open(os.path.join(output_dir, "log.txt"), 'w') as f:
+		f.write("runtime" + "\t" + str(runtime) + "\n")
 
-
-	end = time.time()
-	print("Runtime: ", end - start) 
 
 if __name__ == "__main__":
 	main()    
