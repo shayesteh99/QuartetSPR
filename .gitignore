@@ -10,3 +10,4 @@ trees/*
 tqDist_hasbugs/
 *.log
 *.so
+**/build/*

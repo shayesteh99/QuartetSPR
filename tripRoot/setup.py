@@ -29,7 +29,7 @@ def main():
           author_email="ceciliamaitouyen@gmail.com",
           ext_modules=[Extension("triproot",sources=sources, 
                               extra_compile_args=extra_compile_args,
-                              include_dirs=["/Users/home/Desktop/tripVote-master_new_algo/tripRoot"])])
+                              include_dirs=["./tripRoot"])])
 
 if __name__ == "__main__":
     main()
