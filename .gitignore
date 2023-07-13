@@ -10,3 +10,5 @@ trees/*
 tqDist_hasbugs/
 *.log
 *.so
+**/build/*
+.DS_Store
