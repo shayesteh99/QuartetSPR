@@ -17,7 +17,9 @@ def __label_tree__(tree_obj):
 	i = 0
 	labels = set()
 	for node in tree_obj.traverse_preorder():
-		if not node.is_leaf() and (not node.label or node.label in labels):
+		if node.is_leaf():
+			continue
+		if not node.label or node.label in labels or node.label[0] != 'I': 
 			is_labeled = False
 			node.label = 'I' + str(i)
 			i += 1        
@@ -50,7 +52,7 @@ def get_clade_leaves(clade_dict, node):
 			leaves += clade_dict[child.label]
 	clade_dict[node.label] = leaves
 
-def cal_nodal_dist(u, v):
+def cal_nodal_dist(u, v, branch_length = False):
 	u_ancestors = {}
 	v_ancestors = {}
 	u_ancestors[u.label] = 0
@@ -59,13 +61,19 @@ def cal_nodal_dist(u, v):
 	node = u
 	while not node.is_root():
 		parent = node.parent
-		u_ancestors[parent.label] = u_ancestors[node.label] + 1
+		d = 1
+		if branch_length:
+			d = node.get_edge_length()
+		u_ancestors[parent.label] = u_ancestors[node.label] + d
 		node = parent
 
 	node = v
 	while node.label not in u_ancestors:
 		parent = node.parent
-		v_ancestors[parent.label] = v_ancestors[node.label] + 1
+		d = 1
+		if branch_length:
+			d = node.get_edge_length()
+		v_ancestors[parent.label] = v_ancestors[node.label] + d
 		node = parent
 
 	lca = node
@@ -76,7 +84,6 @@ def main():
 	parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('-i', '--input', required=True, help="Input tree to be completed")
 	parser.add_argument('-r', '--refs', required=True, help="Reference trees that are used to complete input trees.")
-	# parser.add_argument('-t', '--true_tree', required=False, help="True species tree")
 	parser.add_argument('-o', '--output_file', required=True, help="Output file")
 
 	args = parser.parse_args()
@@ -94,53 +101,72 @@ def main():
 	inputTree_obj = read_tree_newick(inputTree)
 	is_labeled = __label_tree__(inputTree_obj)
 	# print(inputTree_obj.newick())
-	for node in inputTree_obj.traverse_preorder():
-		node.edge_length = None
+	# for node in inputTree_obj.traverse_preorder():
+	# 	node.edge_length = None
+	print(inputTree_obj.newick())
 
 	dataset = []
-	num_leaves = inputTree_obj.num_nodes(leaves=True, internal=False)
+	qspr_input_list = []
+	# num_leaves = inputTree_obj.num_nodes(leaves=True, internal=False)
+	all_leaves = inputTree_obj.traverse_leaves()
+	all_leaves = [l.label for l in all_leaves]
 
 	nodes = []
 	tree_root = None
 	for node in inputTree_obj.traverse_preorder():
 		if node.is_root():
 			tree_root = node
-		else:
-			nodes.append(node)
-
-	if tree_root is None:
-		print("No root???")
+		nodes.append(node)
 
 	clade_dict = {}
 	get_clade_leaves(clade_dict, tree_root)
 
 	for n in nodes:
 		label = n.label
-		print("label: ", label)
-		new_tree = treeswift.read_tree_newick(inputTree_obj.newick())
-		clade_root = new_tree.label_to_node([label])[label]
-		parent = clade_root.parent
-		# print("parent: ", parent)
-		parent.remove_child(clade_root)
-		other_child = parent.child_nodes()[0]
-		before_placement = other_child.label
-		# print("other child: ", other_child)
-		if parent.is_root():
-			other_child.parent = None
-			new_tree.root = other_child
-			# new_tree.reroot(other_child)
-			# other_child.remove_child(parent)
-		else:
+		for child in n.child_nodes():
+			new_tree = treeswift.read_tree_newick(inputTree_obj.newick())
+			clade_root = new_tree.label_to_node([child.label])[child.label]
+			parent = clade_root.parent
 			grand_parent = parent.parent
-			# print("grand parent: ", grand_parent)
-			grand_parent.remove_child(parent)
-			grand_parent.add_child(other_child)
 
-		if new_tree.num_nodes(internal = False) < 3:
-			continue
+			parent.remove_child(clade_root)
+			before_placement = parent.child_nodes()[0].label
 
-		placement_set = clade_dict[label]
-		outputTrees, total_scores, _ = complete_gene_trees([new_tree.newick()], refTrees=refTrees , placement_taxa=placement_set, sample_size =0 ,nsample = 0)
+			if grand_parent is None:
+				if len(parent.child_nodes()) == 1:
+					other_child = parent.child_nodes()[0]
+					other_child.parent = None
+					new_tree.root = other_child
+			else:
+				grand_parent.remove_child(parent)
+				for c in parent.child_nodes():
+					grand_parent.add_child(c)
+
+			if new_tree.num_nodes(internal = False) < 3:
+				continue
+
+			placement_set = clade_dict[child.label]
+			qspr_input_list.append((clade_root.label, placement_set, new_tree.newick(), before_placement))
+
+		if not n.is_root():
+			if len(clade_dict[n.label]) >= 3:
+				new_tree = treeswift.read_tree_newick(inputTree_obj.newick())
+				new_root = new_tree.label_to_node([n.label])[n.label]
+				before_placement = new_root.label
+
+				new_root.parent = None
+				new_tree.root = new_root
+				placement_set = list(set(all_leaves) - set(clade_dict[n.label]))
+				qspr_input_list.append((clade_root.label, placement_set, new_tree.newick(), before_placement))
+
+
+	for record in qspr_input_list:
+		label = record[0]
+		placement_set = record[1]
+		input_tree_str = record[2]
+		before_placement = record[3]
+
+		outputTrees, total_scores, _ = complete_gene_trees([input_tree_str], refTrees=refTrees , placement_taxa=placement_set, sample_size =0 ,nsample = 0)
 		after_placement = max(total_scores, key=total_scores.get)
 		if total_scores[before_placement] == total_scores[after_placement]:
 			after_placement = before_placement
@@ -148,25 +174,53 @@ def main():
 		before_node = inputTree_obj.label_to_node([before_placement])[before_placement]
 		after_node = inputTree_obj.label_to_node([after_placement])[after_placement]
 		nodal_dist = cal_nodal_dist(before_node, after_node)
+		branch_dist = cal_nodal_dist(before_node, after_node, branch_length = True)
+		# print("branch dist: ", branch_dist)
+		before_root_dist = cal_nodal_dist(before_node, tree_root)
+		after_root_dist = cal_nodal_dist(after_node, tree_root)
+
 		quartet_dist = total_scores[after_placement] - total_scores[before_placement]
 
-		record = []
-		placement_string = ",".join(placement_set)
-		record.append(placement_string)
-		if is_labeled:
-			record.append(label)
-		else:
-			record.append("-")
+		spr_record = []
 
-		record.append(str(nodal_dist))
-		record.append(str(quartet_dist))
-		n = num_leaves - len(placement_set)
+		#clade taxa
+		placement_string = ",".join(placement_set)
+		spr_record.append(placement_string)
+
+		#label
+		if is_labeled:
+			spr_record.append(label)
+		else:
+			spr_record.append("-")
+
+		#placement label
+		if is_labeled:
+			spr_record.append(after_placement)
+		else:
+			spr_record.append("-")
+
+		# nodal dist
+		spr_record.append(str(nodal_dist))
+
+		# branch dist
+		spr_record.append(str(branch_dist))
+
+		# dist to root (before)
+		spr_record.append(str(before_root_dist))
+
+		# dist to root (after)
+		spr_record.append(str(after_root_dist))
+
+		#quartet score diff
+		spr_record.append(str(quartet_dist))
+		n = len(all_leaves) - len(placement_set)
 		n_choose_three = (n * (n-1) * (n-2)) / 6
-		record.append(str(n_choose_three))
-		dataset.append(record)
+		spr_record.append(str(n_choose_three * len(placement_set) * len(refTrees)))
+		dataset.append(spr_record)
 
 	with open(args.output_file, 'w') as f:
-		f.write("clade taxa" + "\t" + "label" + "\t" + "nodal dist" + "\t" + "quartet score diff" + "\t" + "remaining taxa choose 3" + "\n")
+		f.write("clade taxa" + "\t" + "label" + "\t" + "placement label" + "\t" + "nodal dist" + "\t" + "branch dist" + "\t" + "dist to root (before)" + "\t" + "dist to root (after)" + "\t" 
+			+ "quartet score diff" + "\t" + "n-m choose 3 * m" + "\n")
 		for r in dataset:
 			f.write("\t".join(r) + "\n")
 
