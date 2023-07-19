@@ -1,3 +1,3 @@
-numpy==1.23.5
-tqdist==1.1
-treeswift==1.1.30
+numpy==1.24.2
+tqdist==1.0
+treeswift==1.1.33
