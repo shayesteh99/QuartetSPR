@@ -26,17 +26,6 @@ def __label_tree__(tree_obj):
 		labels.add(node.label)
 	return is_labeled
 
-def compare_trees(true_trees, new_tree_file, output_dir):
-	total_FN = 0
-	for i in range(len(true_trees)):
-		os.system("compareTrees/compareTrees.missingBranch " + output_dir + "/true_tree_" + str(i) + ".trees" + " " + new_tree_file + " > " + output_dir + "/log.txt")
-		with open(output_dir + "/log.txt", 'r') as f:
-			lines = f.readlines()
-			FN = float(lines[0].split()[-1])
-			total_FN += FN
-	total_FN /= len(true_trees)
-	return total_FN
-
 def get_clade_leaves(clade_dict, node):
 	if node.is_leaf():
 		if node.label not in clade_dict:
