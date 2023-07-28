@@ -100,6 +100,14 @@ def main():
 	all_leaves = inputTree_obj.traverse_leaves()
 	all_leaves = [l.label for l in all_leaves]
 
+	bl_heights = inputTree_obj.distances_from_root(leaves=True, internal=False, unlabeled=False, weighted=True)
+	bl_heights = [b[1] for b in bl_heights]
+	bl_avg_height = np.mean(bl_heights)
+
+	nodal_heights = inputTree_obj.distances_from_root(leaves=True, internal=False, unlabeled=False, weighted=False)
+	nodal_heights = [b[1] for b in nodal_heights]
+	nodal_avg_height = np.mean(nodal_heights)
+
 	nodes = []
 	tree_root = None
 	for node in inputTree_obj.traverse_preorder():
@@ -191,8 +199,14 @@ def main():
 		# nodal dist
 		spr_record.append(str(nodal_dist))
 
+		#avg nodal height
+		spr_record.append(str(nodal_avg_height))
+
 		# branch dist
 		spr_record.append(str(branch_dist))
+
+		#avg bl height
+		spr_record.append(str(bl_avg_height))
 
 		# dist to root (before)
 		spr_record.append(str(before_root_dist))
@@ -202,13 +216,14 @@ def main():
 
 		#quartet score diff
 		spr_record.append(str(quartet_dist))
+
 		n = len(all_leaves) - len(placement_set)
 		n_choose_three = (n * (n-1) * (n-2)) / 6
 		spr_record.append(str(n_choose_three * len(placement_set) * len(refTrees)))
 		dataset.append(spr_record)
 
 	with open(args.output_file, 'w') as f:
-		f.write("clade taxa" + "\t" + "label" + "\t" + "placement label" + "\t" + "nodal dist" + "\t" + "branch dist" + "\t" + "dist to root (before)" + "\t" + "dist to root (after)" + "\t" 
+		f.write("clade taxa" + "\t" + "label" + "\t" + "placement label" + "\t" + "nodal dist" + "\t" + "avg nodal height" + "\t" + "branch dist" + "\t" + "avg branch height" + "\t" + "dist to root (before)" + "\t" + "dist to root (after)" + "\t" 
 			+ "quartet score diff" + "\t" + "n-m choose 3 * m" + "\n")
 		for r in dataset:
 			f.write("\t".join(r) + "\n")
