@@ -103,10 +103,12 @@ def main():
 	bl_heights = inputTree_obj.distances_from_root(leaves=True, internal=False, unlabeled=False, weighted=True)
 	bl_heights = [b[1] for b in bl_heights]
 	bl_avg_height = np.mean(bl_heights)
+	bl_std_height = np.std(bl_heights)
 
 	nodal_heights = inputTree_obj.distances_from_root(leaves=True, internal=False, unlabeled=False, weighted=False)
 	nodal_heights = [b[1] for b in nodal_heights]
 	nodal_avg_height = np.mean(nodal_heights)
+	nodal_std_height = np.std(nodal_heights)
 
 	nodes = []
 	tree_root = None
@@ -202,11 +204,17 @@ def main():
 		#avg nodal height
 		spr_record.append(str(nodal_avg_height))
 
+		#std nodal height
+		spr_record.append(str(nodal_std_height))
+
 		# branch dist
 		spr_record.append(str(branch_dist))
 
 		#avg bl height
 		spr_record.append(str(bl_avg_height))
+
+		#std bl height
+		spr_record.append(str(bl_std_height))
 
 		# dist to root (before)
 		spr_record.append(str(before_root_dist))
@@ -223,7 +231,7 @@ def main():
 		dataset.append(spr_record)
 
 	with open(args.output_file, 'w') as f:
-		f.write("clade taxa" + "\t" + "label" + "\t" + "placement label" + "\t" + "nodal dist" + "\t" + "avg nodal height" + "\t" + "branch dist" + "\t" + "avg branch height" + "\t" + "dist to root (before)" + "\t" + "dist to root (after)" + "\t" 
+		f.write("clade taxa" + "\t" + "label" + "\t" + "placement label" + "\t" + "nodal dist" + "\t" + "avg nodal height" + "\t" + "nodal height std" + "\t" + "branch dist" + "\t" + "avg branch height" + "\t" + "branch height std" + "\t" + "dist to root (before)" + "\t" + "dist to root (after)" + "\t" 
 			+ "quartet score diff" + "\t" + "n-m choose 3 * m" + "\n")
 		for r in dataset:
 			f.write("\t".join(r) + "\n")
