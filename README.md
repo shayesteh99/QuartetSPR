@@ -3,7 +3,7 @@ The algorithm and the code heavily depend on the tqDist software http://birc.au.
 **Installation: using git**
 
 ```bash
-git clone https://github.com/shayesteh99/Quartet_SPR.git
+git clone https://github.com/shayesteh99/QuartetSPR.git
 cd Quartet_SPR
 pip install -r requirements.txt
 cd tripRoot
